@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Procore</string>
+    <string name="NetworkError">Error making github request</string>
+</resources>
