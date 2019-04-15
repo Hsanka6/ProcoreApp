@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<PullRequest> posPr = new ArrayList<>();
     ArrayList<String> fileChanges = new ArrayList<>();
 
+    ArrayList<OpenRequest> openRequests = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
         Button splitButton = findViewById(R.id.splitButton);
 
         Button unisonButton = findViewById(R.id.unisonButton);
+
+        Button prListButton = findViewById(R.id.prListButton);
 
 
         splitButton.setOnClickListener(new View.OnClickListener() {
@@ -75,14 +80,65 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        prListButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getPullRequest(c,"https://api.github.com/repos/gabrielemariotti/cardslib/pulls");
+
+            }
+        });
+
+
+
+    }
+
+    private void getPullRequest(final Context c, String s) {
+        Request request = new Request.Builder()
+                .url(s)
+                .build();
+        client.newCall(request)
+                .enqueue(new Callback() {
+                    @Override
+                    public void onFailure(final Call call, IOException e) {
+                        e.printStackTrace();
+                        // Error and make a toast
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(c,getString(R.string.NetworkError),Toast.LENGTH_LONG);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        String res = response.body().string();
+                        try {
+                            JSONArray j = new JSONArray(res);
+                            for (int i = 0; i < j.length();i++){
+                                JSONObject object = j.getJSONObject(i);
+                                if(object.getString("state").equals("open")) {
+                                    OpenRequest op = new OpenRequest(object.getInt("number"), object.getString("title"));
+                                    openRequests.add(op);
+                                }
+                            }
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
     }
 
 
-    void doGetRequest(final Context c, String url, final String type) throws IOException{
+    private void doGetRequest(final Context c, String url, final String type) throws IOException{
         Request request = new Request.Builder()
                 .url(url)
                 .build();
-        System.out.println("In dogetrequest");
         client.newCall(request)
                 .enqueue(new Callback() {
                     @Override
