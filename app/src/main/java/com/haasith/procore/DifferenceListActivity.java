@@ -22,13 +22,13 @@ public class DifferenceListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_difference_list);
         recyclerView = findViewById(R.id.recyclerView);
 
-
+        System.out.println("IN Difference list activity");
         prs = (ArrayList<PullRequest>) getIntent().getSerializableExtra("PRS");
 
-
-        for(int i = 0; i < prs.size();i++){
-            Log.d("newFile is ", prs.get(i).newFile);
-        }
+//
+//        for(int i = 0; i < prs.size();i++){
+//            Log.d("newFile is ", prs.get(i).newFile);
+//        }
 
         setUpRecyclerView();
 
@@ -38,8 +38,5 @@ public class DifferenceListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new DifferenceAdaptor(this,prs));
     }
-
-
-
 
 }

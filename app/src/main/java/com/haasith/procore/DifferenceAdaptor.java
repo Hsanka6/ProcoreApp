@@ -69,7 +69,7 @@ class DifferenceAdaptor extends RecyclerView.Adapter<DifferenceAdaptor.CustomVie
             hashText.setSpan(new ForegroundColorSpan(Color.RED), negativeMatcher.start(), negativeMatcher.end(), 0);
         }
 
-        Matcher matcher = Pattern.compile("\\@([ +,@A-Za-z0-9_-]+)").matcher(hashText);
+        Matcher matcher = Pattern.compile("\\@\\@([ +,@A-Za-z0-9_-]+)").matcher(hashText);
         while (matcher.find())
         {
             hashText.setSpan(new ForegroundColorSpan(Color.BLUE), matcher.start(), matcher.end(), 0);
@@ -77,47 +77,6 @@ class DifferenceAdaptor extends RecyclerView.Adapter<DifferenceAdaptor.CustomVie
 
         return hashText;
 
-//
-//        String [] lines = codeLines.split("\\n");
-//        SpannableString newTex = new SpannableString("");
-//
-//
-//        //String newString = oldString.replaceAll(textToHighlight, "<font color='red'>"+textToHighlight+"</font>");
-//
-//        for(int i = 0; i < lines.length;i++){
-//            SpannableString newString = new SpannableString(lines[i]);
-//            String root = lines[i].substring(0,2);
-//            switch(root){
-//                case"+ ":
-//                    newString.setSpan(new ForegroundColorSpan(Color.GREEN), 0, newString.length() -1, 0);
-//                    break;
-//                case"- ":
-//                    newString.setSpan(new ForegroundColorSpan(Color.RED), 0, newString.length() -1, 0);
-//                case"@@":
-//                    newString.setSpan(new ForegroundColorSpan(Color.BLUE), 0, newString.length() -1, 0);
-//                    break;
-//                default:
-//                    newString.setSpan(new ForegroundColorSpan(Color.GRAY), 0, newString.length() -1, 0);
-//                    break;
-//
-//            }
-//           // System.out.println(newString+ " this is new string");
-//            TextUtils.concat(newString, new SpannableString("\n"));
-//
-//            TextUtils.concat(newTex, newString);
-//            //System.out.println(newTex+ " this is new string");
-//
-//
-////            System.out.println("new String is" + newString);
-//
-//            //codeLines += newString;
-//        }
-//
-//        //SpannableString newTex = new SpannableString("");
-//
-//
-//
-//        return newTex;
     }
 
 
