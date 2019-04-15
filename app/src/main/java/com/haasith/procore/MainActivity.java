@@ -123,6 +123,12 @@ public class MainActivity extends AppCompatActivity {
                                     openRequests.add(op);
                                 }
                             }
+                            Intent myIntent = new Intent(c, PullRequestListActivity.class);
+
+                            myIntent.putParcelableArrayListExtra("prList", openRequests);
+
+                            startActivity(myIntent);
+
 
 
                         } catch (JSONException e) {
