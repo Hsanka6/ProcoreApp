@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 try {
-                    doGetRequest(c,"https://api.github.com/repos/gabrielemariotti/cardslib/pulls/567", "unison");
+                    doGetRequest(c,"https://api.github.com/repos/recruit-mtl/Graphs/pulls/16", "unison");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         prListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getPullRequest(c,"https://api.github.com/repos/gabrielemariotti/cardslib/pulls");
+                getPullRequest(c,"https://api.github.com/repos/square/picasso/pulls");
 
             }
         });
@@ -128,8 +128,6 @@ public class MainActivity extends AppCompatActivity {
                             myIntent.putParcelableArrayListExtra("prList", openRequests);
 
                             startActivity(myIntent);
-
-
 
                         } catch (JSONException e) {
                             e.printStackTrace();

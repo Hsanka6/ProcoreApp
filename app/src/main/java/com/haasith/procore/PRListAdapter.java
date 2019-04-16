@@ -80,17 +80,22 @@ public class PRListAdapter extends RecyclerView.Adapter<PRListAdapter.CustomView
 
         @Override
         public void onClick(View view) {
-            negPr.clear();
-            posPr.clear();
-            prs.clear();
+//            negPr.clear();
+//            posPr.clear();
+//            prs.clear();
             int position = getAdapterPosition();
             int pullNumber = prList.get(position).prNumber;
 
-            System.out.println("Picked this pr number " + pullNumber);
+
+            Intent intent = new Intent(context, SplitActivity.class);
+            intent.putExtra("PullRequestNum", pullNumber);
+            context.startActivity(intent);
+
+            //System.out.println("Picked this pr number " + pullNumber);
             //doGetRequest(c,"https://api.github.com/repos/Yalantis/Koloda/pulls/422");
             //Yelp/yelp-fusion/pull/283
-            Log.d("Button", "is pressed");
-            doGetRequest(context,"https://api.github.com/repos/gabrielemariotti/cardslib/pulls/"+String.valueOf(pullNumber));
+           // Log.d("Button", "is pressed");
+            //doGetRequest(context,"https://api.github.com/repos/recruit-mtl/Graphs/pulls/"+String.valueOf(pullNumber));
         }
     }
     private void doGetRequest(final Context c, String url) {
@@ -166,24 +171,7 @@ public class PRListAdapter extends RecyclerView.Adapter<PRListAdapter.CustomView
                             negLines += lines[j] + "\n";
                         }
                         break;
-                    case"+ ":
-                        System.out.println("root equal " + root +" "+lines[j]);
-                        codelines += lines[j] + "\n";
-                        posLines += lines[j] + "\n";
-                        break;
-                    case"+\t":
-                        codelines += lines[j] + "\n";
-                        posLines += lines[j] + "\n";
-                        break;
-                    case"- ":
-                        codelines += lines[j] + "\n";
-                        negLines += lines[j] + "\n";
-                        break;
-                    case"-\t":
-                        codelines += lines[j] + "\n";
-                        negLines += lines[j] + "\n";
-                        break;
-                    case"  ":
+                    case" ":
                         codelines += lines[j] + "\n";
                         negLines += lines[j] + "\n";
                         posLines += lines[j] + "\n";
@@ -217,9 +205,9 @@ public class PRListAdapter extends RecyclerView.Adapter<PRListAdapter.CustomView
                 }
             }
 
-            System.out.println("positive lines are " +posLines);
-//
-            System.out.println("negative lines are " +negLines);
+//            System.out.println("positive lines are " +posLines);
+////
+//            System.out.println("negative lines are " +negLines);
 
             pr.setCodeLines(codelines);
             neg.setCodeLines(negLines);
@@ -230,10 +218,10 @@ public class PRListAdapter extends RecyclerView.Adapter<PRListAdapter.CustomView
 
         }
         Intent myIntent = new Intent(context, SplitActivity.class);
-
         myIntent.putParcelableArrayListExtra("PRS", prs);
         myIntent.putParcelableArrayListExtra("NEG", negPr);
         myIntent.putParcelableArrayListExtra("POS", posPr);
+
 
         context.startActivity(myIntent);
 

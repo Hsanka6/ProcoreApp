@@ -1,5 +1,6 @@
 package com.haasith.procore;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +9,21 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SplitActivity extends AppCompatActivity {
 
@@ -16,10 +31,12 @@ public class SplitActivity extends AppCompatActivity {
     RecyclerView negRecylerView;
     RecyclerView posRecylerView;
 
-    ArrayList<PullRequest> neg = new ArrayList<>();
     ArrayList<PullRequest> prs = new ArrayList<>();
 
-    ArrayList<PullRequest> pos = new ArrayList<>();
+    OkHttpClient client = new OkHttpClient();
+    ArrayList<PullRequest> negPr = new ArrayList<>();
+    ArrayList<PullRequest> posPr = new ArrayList<>();
+    ArrayList<String> fileChanges = new ArrayList<>();
 
 
     @Override
@@ -28,19 +45,29 @@ public class SplitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_split);
         posRecylerView = findViewById(R.id.pos);
         negRecylerView = findViewById(R.id.neg);
-        neg = getIntent().getParcelableArrayListExtra("NEG");
-        pos = getIntent().getParcelableArrayListExtra("POS");
-        prs = getIntent().getParcelableArrayListExtra("PRS");
-        setUpRecyclerView();
+//        neg = getIntent().getParcelableArrayListExtra("NEG");
+//        pos = getIntent().getParcelableArrayListExtra("POS");
+//        prs = getIntent().getParcelableArrayListExtra("PRS");
+
+        doGetRequest(this, "https://api.github.com/repos/square/picasso/pulls/"+String.valueOf(getIntent().getExtras().getInt("PullRequestNum")));
+
+
     }
 
-    private void setUpRecyclerView() {
+    private void setUpRecyclerView(final Context c, final ArrayList<PullRequest> posPr, final ArrayList<PullRequest> negPr) {
+        runOnUiThread(new Runnable() {
 
-        negRecylerView.setLayoutManager(new LinearLayoutManager(this));
-        negRecylerView.setAdapter(new DifferenceAdaptor(this,neg));
+            @Override
+            public void run() {
+                negRecylerView.setLayoutManager(new LinearLayoutManager(c));
+                negRecylerView.setAdapter(new DifferenceAdaptor(c, negPr));
 
-        posRecylerView.setLayoutManager(new LinearLayoutManager(this));
-        posRecylerView.setAdapter(new DifferenceAdaptor(this,pos));
+                posRecylerView.setLayoutManager(new LinearLayoutManager(c));
+                posRecylerView.setAdapter(new DifferenceAdaptor(c, posPr));
+
+            }
+        });
+
     }
 
     // create an action bar button
@@ -65,4 +92,191 @@ public class SplitActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+
+
+    private void doGetRequest(final Context c, String url) {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+        client.newCall(request)
+                .enqueue(new Callback() {
+                    @Override
+                    public void onFailure(final Call call, IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        String res = response.body().string();
+                        try {
+                            JSONObject j = new JSONObject(res);
+                            System.out.println(j.toString());
+                            printLines(j.getString("diff_url"));
+                            processChanges1();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+    }
+
+    private void processChanges1() {
+        System.out.println("in processChanges");
+
+        for(int i = 0; i < fileChanges.size();i++){
+
+            String[] lines = fileChanges.get(i).split("\n");
+            PullRequest pr = new PullRequest();
+            PullRequest neg = new PullRequest();
+            PullRequest pos = new PullRequest();
+
+            System.out.println(lines.length + " is length");
+            String codelines = "";
+            String negLines = "";
+            String posLines = "";
+
+            for(int j =0; j < lines.length;j++){
+                String root = lines[j].substring(0,1);
+
+                if(lines[j].length() == 1){
+                    root = " ";
+                }
+                /// System.out.println("root is " + root  + " " + root.equals("+ ")  +" "+ root.equals("- ") );
+                switch(root){
+                    case"+":
+                        if (lines[j].charAt(1) == '+') {
+                            pr.setNewFile(lines[j]);
+                            pos.setNewFile(lines[j]);
+                            neg.setNewFile(lines[j]);
+                        }
+                        else{
+                            codelines += lines[j] + "\n";
+                            posLines += lines[j] + "\n";
+                        }
+                        break;
+                    case"-":
+                        if (lines[j].charAt(1) == '-') {
+                            pr.setNewFile(lines[j]);
+                            pos.setNewFile(lines[j]);
+                            neg.setNewFile(lines[j]);
+                        }
+                        else{
+                            codelines += lines[j] + "\n";
+                            negLines += lines[j] + "\n";
+                        }
+                        break;
+                    case"+ ":
+                        System.out.println("root equal " + root +" "+lines[j]);
+                        codelines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
+                        break;
+                    case"+\t":
+                        codelines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
+                        break;
+                    case"- ":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        break;
+                    case"-\t":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        break;
+                    case"  ":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
+                        break;
+                    case"d":
+                        break;
+                    case"i":
+                        break;
+                    case"@@":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
+                        break;
+                    default:
+                        // System.out.println("root equal default pos check" + root.equals("+ ") +" neg check "+root.equals("- ") +" "+ "root is actually " + root.equals("+\t") +" is line "+lines[j] + " root is actually" + root + "this is the root");
+
+                        codelines += lines[j] + "\n";
+                        if(!root.equals("+ ")) {
+                            negLines += lines[j] + "\n";
+                        }
+                        if(!root.equals("- ")) {
+                            posLines += lines[j] + "\n";
+                        }
+                        break;
+                }
+            }
+
+//            System.out.println("positive lines are " +posLines);
+////
+//            System.out.println("negative lines are " +negLines);
+
+            pr.setCodeLines(codelines);
+            neg.setCodeLines(negLines);
+            pos.setCodeLines(posLines);
+            prs.add(pr);
+            posPr.add(pos);
+            negPr.add(neg);
+
+        }
+        setUpRecyclerView(this, posPr, negPr);
+//        Intent myIntent = new Intent(context, SplitActivity.class);
+//        myIntent.putParcelableArrayListExtra("PRS", prs);
+//        myIntent.putParcelableArrayListExtra("NEG", negPr);
+//        myIntent.putParcelableArrayListExtra("POS", posPr);
+//
+//
+//        context.startActivity(myIntent);
+
+    }
+
+
+
+
+
+
+    void printLines(String link){
+
+        System.out.println("in print lines" + link);
+        String diffString = "";
+        try {
+            URL url = new URL(link);
+            // Read all the text line by line
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            String str;
+            int i = 0;
+            while ((str = in.readLine()) != null) {
+                //   System.out.println("string line is " +i + " " + str);
+                diffString = "";
+//                if(i >= 1 && str.charAt(0) == 'd') {
+//                    fileChanges.add(diffString);
+//                    diffString = "";
+//                }
+//                else {
+//                    diffString += str + "\n";
+//                }
+                diffString += str + "\n";
+                fileChanges.add(diffString);
+
+                i +=1;
+            }
+
+            in.close();
+        } catch (MalformedURLException e) {
+        } catch (IOException e) {
+        }
+
+        // System.out.println("this is filechanges "+fileChanges.size());
+        return;
+    }
+
+
+
 }

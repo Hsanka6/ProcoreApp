@@ -18,14 +18,6 @@ public class PullRequestListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pull_request_list);
         prRecyclerView = findViewById(R.id.prList);
         openPrs = getIntent().getParcelableArrayListExtra("prList");
-
-        for(int i = 0; i < openPrs.size();i++){
-
-            System.out.println("title is "+openPrs.get(i).prTitle);
-            System.out.println("number is "+openPrs.get(i).prNumber);
-        }
-
-
         setUpRecyclerView();
     }
 

@@ -55,7 +55,7 @@ class DifferenceAdaptor extends RecyclerView.Adapter<DifferenceAdaptor.CustomVie
     private SpannableString process(String codeLines) {
         SpannableString hashText = new SpannableString(codeLines);
 
-        Matcher positiveMatcher = Pattern.compile("\\+ (.*)\n").matcher(hashText);
+        Matcher positiveMatcher = Pattern.compile("^\\+(.*)").matcher(hashText);
         while (positiveMatcher.find())
         {
             hashText.setSpan(new ForegroundColorSpan(context.getColor(R.color.colorPrimary)), positiveMatcher.start(), positiveMatcher.end(), 0);
@@ -63,13 +63,13 @@ class DifferenceAdaptor extends RecyclerView.Adapter<DifferenceAdaptor.CustomVie
 
 
 
-        Matcher negativeMatcher = Pattern.compile("\\- (.*)\n").matcher(hashText);
+        Matcher negativeMatcher = Pattern.compile("^\\-(.*)").matcher(hashText);
         while (negativeMatcher.find())
         {
             hashText.setSpan(new ForegroundColorSpan(Color.RED), negativeMatcher.start(), negativeMatcher.end(), 0);
         }
 
-        Matcher matcher = Pattern.compile("\\@\\@([ +,@A-Za-z0-9_-]+)").matcher(hashText);
+        Matcher matcher = Pattern.compile("\\@\\@([ +,@A-Za-z0-9_-]+)\\@\\@").matcher(hashText);
         while (matcher.find())
         {
             hashText.setSpan(new ForegroundColorSpan(Color.BLUE), matcher.start(), matcher.end(), 0);
