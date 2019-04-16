@@ -26,8 +26,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class SplitActivity extends AppCompatActivity {
-
-
     RecyclerView negRecylerView;
     RecyclerView posRecylerView;
 
@@ -38,25 +36,19 @@ public class SplitActivity extends AppCompatActivity {
     ArrayList<PullRequest> posPr = new ArrayList<>();
     ArrayList<String> fileChanges = new ArrayList<>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_split);
+        this.setTitle("Split View");
         posRecylerView = findViewById(R.id.pos);
         negRecylerView = findViewById(R.id.neg);
-//        neg = getIntent().getParcelableArrayListExtra("NEG");
-//        pos = getIntent().getParcelableArrayListExtra("POS");
-//        prs = getIntent().getParcelableArrayListExtra("PRS");
-
-        doGetRequest(this, "https://api.github.com/repos/square/picasso/pulls/"+String.valueOf(getIntent().getExtras().getInt("PullRequestNum")));
-
-
+        getDiffFileRequest(this, "https://api.github.com/repos/square/picasso/pulls/"+String.valueOf(getIntent().getExtras().getInt("PullRequestNum")));
     }
 
+    //sets up recyclerview on the main thread
     private void setUpRecyclerView(final Context c, final ArrayList<PullRequest> posPr, final ArrayList<PullRequest> negPr) {
         runOnUiThread(new Runnable() {
-
             @Override
             public void run() {
                 negRecylerView.setLayoutManager(new LinearLayoutManager(c));
@@ -67,10 +59,8 @@ public class SplitActivity extends AppCompatActivity {
 
             }
         });
-
     }
-
-    // create an action bar button
+    // create an support action bar button
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.split_menu, menu);
@@ -82,6 +72,7 @@ public class SplitActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        //passes unison pr list to differencelistactivity
         if (id == R.id.unisonViewButton) {
             System.out.println("Hit unison button");
             Intent myIntent = new Intent(this, DifferenceListActivity.class);
@@ -93,10 +84,8 @@ public class SplitActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
-
-    private void doGetRequest(final Context c, String url) {
+    //get diff file from restful api request response
+    private void getDiffFileRequest(final Context c, String url) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -126,7 +115,6 @@ public class SplitActivity extends AppCompatActivity {
 
     private void processChanges1() {
         System.out.println("in processChanges");
-
         for(int i = 0; i < fileChanges.size();i++){
 
             String[] lines = fileChanges.get(i).split("\n");
@@ -169,31 +157,15 @@ public class SplitActivity extends AppCompatActivity {
                             negLines += lines[j] + "\n";
                         }
                         break;
-                    case"+ ":
-                        System.out.println("root equal " + root +" "+lines[j]);
-                        codelines += lines[j] + "\n";
-                        posLines += lines[j] + "\n";
-                        break;
-                    case"+\t":
-                        codelines += lines[j] + "\n";
-                        posLines += lines[j] + "\n";
-                        break;
-                    case"- ":
-                        codelines += lines[j] + "\n";
-                        negLines += lines[j] + "\n";
-                        break;
-                    case"-\t":
-                        codelines += lines[j] + "\n";
-                        negLines += lines[j] + "\n";
-                        break;
-                    case"  ":
-                        codelines += lines[j] + "\n";
-                        negLines += lines[j] + "\n";
-                        posLines += lines[j] + "\n";
-                        break;
                     case"d":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
                         break;
                     case"i":
+                        codelines += lines[j] + "\n";
+                        negLines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
                         break;
                     case"@@":
                         codelines += lines[j] + "\n";
@@ -201,23 +173,12 @@ public class SplitActivity extends AppCompatActivity {
                         posLines += lines[j] + "\n";
                         break;
                     default:
-                        // System.out.println("root equal default pos check" + root.equals("+ ") +" neg check "+root.equals("- ") +" "+ "root is actually " + root.equals("+\t") +" is line "+lines[j] + " root is actually" + root + "this is the root");
-
                         codelines += lines[j] + "\n";
-                        if(!root.equals("+ ")) {
-                            negLines += lines[j] + "\n";
-                        }
-                        if(!root.equals("- ")) {
-                            posLines += lines[j] + "\n";
-                        }
+                        negLines += lines[j] + "\n";
+                        posLines += lines[j] + "\n";
                         break;
                 }
             }
-
-//            System.out.println("positive lines are " +posLines);
-////
-//            System.out.println("negative lines are " +negLines);
-
             pr.setCodeLines(codelines);
             neg.setCodeLines(negLines);
             pos.setCodeLines(posLines);
@@ -227,53 +188,29 @@ public class SplitActivity extends AppCompatActivity {
 
         }
         setUpRecyclerView(this, posPr, negPr);
-//        Intent myIntent = new Intent(context, SplitActivity.class);
-//        myIntent.putParcelableArrayListExtra("PRS", prs);
-//        myIntent.putParcelableArrayListExtra("NEG", negPr);
-//        myIntent.putParcelableArrayListExtra("POS", posPr);
-//
-//
-//        context.startActivity(myIntent);
-
     }
 
-
-
-
-
-
+    //concatenates all lines of the diff file
     void printLines(String link){
-
-        System.out.println("in print lines" + link);
         String diffString = "";
         try {
             URL url = new URL(link);
             // Read all the text line by line
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String str;
-            int i = 0;
             while ((str = in.readLine()) != null) {
-                //   System.out.println("string line is " +i + " " + str);
                 diffString = "";
-//                if(i >= 1 && str.charAt(0) == 'd') {
-//                    fileChanges.add(diffString);
-//                    diffString = "";
-//                }
-//                else {
-//                    diffString += str + "\n";
-//                }
+
                 diffString += str + "\n";
                 fileChanges.add(diffString);
-
-                i +=1;
             }
 
             in.close();
         } catch (MalformedURLException e) {
+            e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        // System.out.println("this is filechanges "+fileChanges.size());
         return;
     }
 

@@ -37,12 +37,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Context c = this;
+
+        getSupportActionBar().hide();
         Button prListButton = findViewById(R.id.prListButton);
         prListButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getPullRequest(c,"https://api.github.com/repos/square/picasso/pulls");
-
             }
         });
     }
@@ -65,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-
                     @Override
                     public void onResponse(Call call, final Response response) throws IOException {
                         String res = response.body().string();
@@ -79,17 +79,12 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             Intent myIntent = new Intent(c, PullRequestListActivity.class);
-
                             myIntent.putParcelableArrayListExtra("prList", openRequests);
-
                             startActivity(myIntent);
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
                     }
                 });
-
     }
 }

@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:textColor="#000"
         android:text="Title"
         android:id="@+id/pullRequestTitle"/>
 

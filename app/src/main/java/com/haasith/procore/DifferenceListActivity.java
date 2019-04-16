@@ -21,17 +21,9 @@ public class DifferenceListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_difference_list);
         recyclerView = findViewById(R.id.recyclerView);
-
-        System.out.println("IN Difference list activity");
+        this.setTitle("Unison View");
         prs = (ArrayList<PullRequest>) getIntent().getSerializableExtra("PRS");
-
-//
-//        for(int i = 0; i < prs.size();i++){
-//            Log.d("newFile is ", prs.get(i).newFile);
-//        }
-
         setUpRecyclerView();
-
     }
 
     private void setUpRecyclerView() {
