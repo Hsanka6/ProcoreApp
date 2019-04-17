@@ -1,5 +1,6 @@
 package com.haasith.procore;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -36,10 +37,19 @@ public class SplitActivity extends AppCompatActivity {
     ArrayList<PullRequest> posPr = new ArrayList<>();
     ArrayList<String> fileChanges = new ArrayList<>();
 
+    ProgressDialog nDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_split);
+        nDialog = new ProgressDialog(this);
+        nDialog.setMessage("Loading...");
+        nDialog.setTitle("Getting Github Data");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(false);
+        nDialog.show();
+
         this.setTitle("Split View");
         posRecylerView = findViewById(R.id.pos);
         negRecylerView = findViewById(R.id.neg);
@@ -51,6 +61,7 @@ public class SplitActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                nDialog.dismiss();
                 negRecylerView.setLayoutManager(new LinearLayoutManager(c));
                 negRecylerView.setAdapter(new DifferenceAdaptor(c, negPr));
 
